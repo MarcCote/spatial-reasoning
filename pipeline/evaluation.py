@@ -37,15 +37,15 @@ world number --> (state_obs, goal_obs, instruct_inds, values)
 def evaluate(model, test_set, savepath=None):
     progress = tqdm(total=len(test_set))
     count = 0
-    for key, (state_obs, goal_obs, instruct_words, instruct_inds, targets) in test_set.iteritems():
+    for key, (state_obs, goal_obs, instruct_words, instruct_inds, targets) in test_set.items():
         progress.update(1)
-        
+
         state = Variable( torch.Tensor(state_obs).long().cuda() )
         objects = Variable( torch.Tensor(goal_obs).long().cuda() )
         instructions = Variable( torch.Tensor(instruct_inds).long().cuda() )
         targets = torch.Tensor(targets)
-        # print state.size(), objects.size(), instructions.size(), targets.size()
-        
+        # print(state.size(), objects.size(), instructions.size(), targets.size())
+
         preds = model.forward( (state, objects, instructions) ).data.cpu()
 
         state_dim = 1
@@ -102,25 +102,25 @@ def simulate(model, sim_set):
     for key in tqdm(range(len(sim_set))):
         (state_obs, goal_obs, instruct_words, instruct_inds, targets, mdps) = sim_set[key]
         # progress.update(1)
-        # print torch.Tensor(state_obs).long().cuda()
+        # print(torch.Tensor(state_obs).long().cuda())
         state = Variable( torch.Tensor(state_obs).long().cuda() )
         objects = Variable( torch.Tensor(goal_obs).long().cuda() )
         instructions = Variable( torch.Tensor(instruct_inds).long().cuda() )
         targets = torch.Tensor(targets)
-        # print state.size(), objects.size(), instructions.size()
-        
+        # print(state.size(), objects.size(), instructions.size())
+
         preds = model.forward(state, objects, instructions).data.cpu().numpy()
-        # print 'sim preds: ', preds.shape
+        # print('sim preds: ', preds.shape)
 
         ## average over all goals
         num_goals = preds.shape[0]
         for ind in range(num_goals):
-            # print ind
+            # print(ind)
             mdp = mdps[ind]
             values = preds[ind,:]
             dim = int(math.sqrt(values.size))
             positions = [(i,j) for i in range(dim) for j in range(dim)]
-            # print 'dim: ', dim
+            # print('dim: ', dim)
             values = preds[ind,:].reshape(dim, dim)
             policy = mdp.get_policy(values)
 
@@ -133,9 +133,9 @@ def simulate(model, sim_set):
                 steps = mdp.simulate(policy, start_pos)
                 steps_list.append(steps)
                 # pdb.set_trace()
-                # print 'simulating: ', start_pos, steps
+                # print('simulating: ', start_pos, steps)
     avg_steps = np.mean(steps_list)
-    # print 'avg steps: ', avg_steps, len(steps_list), len(sim_set), num_goals
+    # print('avg steps: ', avg_steps, len(steps_list), len(sim_set), num_goals)
     return avg_steps
 
 

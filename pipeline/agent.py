@@ -51,7 +51,7 @@ class Agent:
 
     '''
     for each state (i,j) in states, returns a list
-    of neighboring states with approximated values 
+    of neighboring states with approximated values
     in descending order
     '''
     def _get_policy(self, values):
@@ -111,18 +111,18 @@ class Agent:
         batch_size = len(trajectories)
 
         copy_len = min(batch_size, self.replay_size - self.replay_pointer)
-        # print 'batch: ', batch_size, 'copy: ', copy_len
+        # print('batch: ', batch_size, 'copy: ', copy_len)
         start = self.replay_pointer
         end = self.replay_pointer + copy_len
-        # print 'start: ', start, 'end: ', end
+        # print('start: ', start, 'end: ', end)
         self.replay_layouts[start:end] = layouts.data.clone()[:copy_len]
         self.replay_objects[start:end] = objects.data.clone()[:copy_len]
         self.replay_indices[start:end] = indices.data.clone()[:copy_len]
         self.replay_trajectories[start:end] = trajectories[:copy_len]
-        # print self.replay_pointer, self.replay_filled
+        # print(self.replay_pointer, self.replay_filled)
         self.replay_pointer = (self.replay_pointer + copy_len) % self.replay_size
         self.replay_filled = min(self.replay_filled + copy_len, self.replay_size)
-        # print self.replay_pointer, self.replay_filled
+        # print(self.replay_pointer, self.replay_filled)
 
     def sample_filled(self):
         layouts = self.replay_layouts[:self.replay_filled]
@@ -136,11 +136,11 @@ class Agent:
 
     def simulate(self, values, rewards, terminals, max_steps = 75):
         # layouts, objects, indices = inputs
-        # print worlds.size()
+        # print(worlds.size())
         # approx_values = self.network( inputs )
-        # print 'APPROX: ', approx_values.size()
+        # print('APPROX: ', approx_values.size())
         batch_size = values.size(0)
-        # print 'batch: ', batch_size
+        # print('batch: ', batch_size)
         trajectories = []
         scores = []
         for b in range(batch_size):
@@ -153,7 +153,7 @@ class Agent:
 
             start_pos = self._random_pos()
             traj, rew = self._simulate_single(reward_map, terminal_map, value_map, start_pos, max_steps)
-            # print 'got it!', type(traj), len(traj)
+            # print('got it!', type(traj), len(traj))
             trajectories.append(traj)
             scores.append(rew)
         return trajectories, np.mean(scores)
@@ -165,7 +165,7 @@ class Agent:
         approx_values = approx_values.data.squeeze()
 
         M, N = reward_map.size()
-        # print 'M, N: ', M, N
+        # print('M, N: ', M, N)
         if M != self.M or N != self.N:
             raise RuntimeError( 'wrong size: {}x{}, expected: {}x{}'.format(M, N, self.M, self.N) )
             # self._refresh_size(M, N)
@@ -180,30 +180,30 @@ class Agent:
             val = approx_values[pos]
             rew = reward_map[pos]
             term = terminal_map[pos]
-            # print 'VAL: ', val, '\nREW: ', rew, '\nTERM: ', term, approx_values.size(), reward_map.size(), terminal_map.size()
+            # print('VAL: ', val, '\nREW: ', rew, '\nTERM: ', term, approx_values.size(), reward_map.size(), terminal_map.size())
             trajectory.append( (pos, val, rew, term) )
 
             total_reward += rew * (self.gamma ** step)
             if term:
-                # print 'GOT REWARD: ', rew, step, rew * (self.gamma ** step)
-                # print '\n\nDONE\n\n\n\n'
+                # print('GOT REWARD: ', rew, step, rew * (self.gamma ** step))
+                # print('\n\nDONE\n\n\n\n')
                 break
 
             reachable = policy[pos]
             selected = 0
             while selected < len(reachable) and reachable[selected] in visited:
-                # print '    visited ', selected, reachable[selected]
+                # print('    visited ', selected, reachable[selected])
                 selected += 1
             if selected == len(reachable):
-                # print '\n\nVISITED ALL', pos, [n in visited for n in reachable], '\n\n\n\n'
+                # print('\n\nVISITED ALL', pos, [n in visited for n in reachable], '\n\n\n\n')
                 selected = 0
                 # return trajectory
                 break
 
             pos = reachable[selected]
             visited.add(pos)
-            # print 'position: ', pos
-        # print 'traj: ', len(trajectory), 'rew: ', total_reward 
+            # print('position: ', pos)
+        # print('traj: ', len(trajectory), 'rew: ', total_reward )
         return trajectory, total_reward
 
     def _get_size(self, inputs):
@@ -238,7 +238,7 @@ class Agent:
         return inp, targ
 
     def _epoch(self, inputs, trajectories, train_size):
-        # print 'training with: ', [i.size() for i in inputs], len(trajectories)
+        # print('training with: ', [i.size() for i in inputs], len(trajectories))
         self.network.train()
         # data_size = self._get_size(inputs)
         num_batches = int( math.ceil(train_size / float(self.batch_size)) )
@@ -247,7 +247,7 @@ class Agent:
         for i in range(num_batches):
             inp, traj = self._get_batch(inputs, trajectories)
             self.optimizer.zero_grad()
-            
+
             ## get predictions from the network
             ## and target network
             map_pred = self.network.forward(inp)
@@ -277,7 +277,7 @@ class Agent:
         return (i, j)
 
     '''
-    add num_environments environments 
+    add num_environments environments
     to the replay memory
     '''
     def act(self, mdp, num_environments):
@@ -286,12 +286,12 @@ class Agent:
         for i in range(num_batches):
             ## don't need gradients for simulation
             (lay, obj, ind, rew, term), _ = self._get_batch(mdp, None, volatile = True)
-            
+
             ## get value estimations
             inputs = (lay, obj, ind)
             values = self.network(inputs)
 
-            ## add inputs (layouts, objects, indices) 
+            ## add inputs (layouts, objects, indices)
             ## and trajectories to replay memory
             trajectories, score = self.simulate(values, rew, term)
             self.fill_replay(inputs, trajectories)
@@ -321,8 +321,8 @@ class Agent:
             inputs, trajectories = self.sample_filled()
             ## train on experiences
             err = self._epoch(inputs, trajectories, train_size)
-            # print 'err: ', err
-            print i, score
+            # print('err: ', err)
+            print(i, score)
             scores.append(score)
             if i % 20 == 0:
                 self._copy_net()

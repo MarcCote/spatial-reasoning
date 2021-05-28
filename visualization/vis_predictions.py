@@ -6,7 +6,7 @@ from matplotlib import cm
 from matplotlib import pyplot as plt
 
 def vis_value_map(pred, targ, save_path, title='prediction', share=True):
-    # print 'in vis: ', pred.shape, targ.shape
+    # print('in vis: ', pred.shape, targ.shape)
     dim = int(math.sqrt(pred.size))
     if share:
         vmin = min(pred.min(), targ.min())
@@ -29,14 +29,14 @@ def vis_value_map(pred, targ, save_path, title='prediction', share=True):
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     fig.colorbar(heat1, cax=cbar_ax)
 
-    # print 'saving to: ', fullpath
+    # print('saving to: ', fullpath)
     plt.savefig(save_path, bbox_inches='tight')
     plt.close(fig)
 
-    # print pred.shape, targ.shape
+    # print(pred.shape, targ.shape)
 
 def vis_fig(data, save_path, title=None, vmax=None, vmin=None, cmap=cm.jet):
-    # print 'in vis: ', pred.shape, targ.shape
+    # print('in vis: ', pred.shape, targ.shape)
     dim = int(math.sqrt(data.size))
 
     # if share:
@@ -71,11 +71,11 @@ def vis_fig(data, save_path, title=None, vmax=None, vmin=None, cmap=cm.jet):
     # cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     # fig.colorbar(heat1, cax=cbar_ax)
 
-    # print 'saving to: ', fullpath
+    # print('saving to: ', fullpath)
     plt.savefig(save_path, bbox_inches='tight', pad_inches=0.0)
     plt.close(fig)
 
-    # print pred.shape, targ.shape
+    # print(pred.shape, targ.shape)
 
 def vis_predictions(model, inputs, targets, instructions, save_path, prefix=''):
     ## wrap tensors in Variables to pass to model

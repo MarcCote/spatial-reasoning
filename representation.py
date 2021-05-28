@@ -5,7 +5,7 @@ import pipeline, models, data, utils, visualization
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--save_path', type=str, default='logs/trial/')  
+parser.add_argument('--save_path', type=str, default='logs/trial/')
 parser.add_argument('--max_train', type=int, default=5000)
 parser.add_argument('--max_test', type=int, default=500)
 
@@ -36,28 +36,28 @@ args = parser.parse_args()
 train_data, test_data = data.load(args.mode, args.annotations, args.max_train, args.max_test)
 layout_vocab_size, object_vocab_size, text_vocab_size, text_vocab = data.get_statistics(train_data, test_data)
 
-print '\n<Main> Converting to tensors'
+print('\n<Main> Converting to tensors')
 train_layouts, train_objects, train_rewards, train_terminal, \
         train_instructions, train_indices, train_values, train_goals = data.to_tensor(train_data, text_vocab)
 
 test_layouts, test_objects, test_rewards, test_terminal, \
     test_instructions, test_indices, test_values, test_goals = data.to_tensor(test_data, text_vocab)
 
-print '<Main> Training: (', train_layouts.size(), 'x', train_objects.size(), 'x', train_indices.size(), ') -->', train_values.size()
-print '<Main> test     : (', test_layouts.size(), 'x', test_objects.size(), 'x', test_indices.size(), ') -->', test_values.size()
+print('<Main> Training: (', train_layouts.size(), 'x', train_objects.size(), 'x', train_indices.size(), ') -->', train_values.size())
+print('<Main> test     : (', test_layouts.size(), 'x', test_objects.size(), 'x', test_indices.size(), ') -->', test_values.size())
 
 
 #################################
 ############ Training ###########
 #################################
 
-print '\n<Main> Initializing model: {}'.format(args.model)
+print('\n<Main> Initializing model: {}'.format(args.model))
 model = models.init(args, layout_vocab_size, object_vocab_size, text_vocab_size)
 
 train_inputs = (train_layouts, train_objects, train_indices)
 test_inputs = (test_layouts, test_objects, test_indices)
 
-print '<Main> Training model'
+print('<Main> Training model')
 trainer = pipeline.Trainer(model, args.lr, args.batch_size)
 trainer.train(train_inputs, train_values, test_inputs, test_values, iters=args.iters)
 
@@ -71,11 +71,11 @@ pickle_path = os.path.join(args.save_path, 'pickle')
 utils.mkdir(args.save_path)
 utils.mkdir(pickle_path)
 
-print '\n<Main> Saving model to {}'.format(args.save_path)
+print('\n<Main> Saving model to {}'.format(args.save_path))
 ## save model
 torch.save(model, os.path.join(args.save_path, 'model.pth'))
 
-print '<Main> Saving predictions to {}'.format(pickle_path)
+print('<Main> Saving predictions to {}'.format(pickle_path))
 ## save inputs, outputs, and MDP info (rewards and terminal maps)
 pipeline.save_predictions(model, test_inputs, test_values, test_rewards, test_terminal, text_vocab, pickle_path, prefix='test_')
 
@@ -87,7 +87,7 @@ pipeline.save_predictions(model, test_inputs, test_values, test_rewards, test_te
 vis_path = os.path.join(args.save_path, 'visualization')
 utils.mkdir(vis_path)
 
-print '<Main> Saving visualizations to {}'.format(vis_path)
+print('<Main> Saving visualizations to {}'.format(vis_path))
 ## save images with predicted and target value maps
 visualization.vis_predictions(model, test_inputs, test_values, test_instructions, vis_path, prefix='test_')
 

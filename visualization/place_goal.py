@@ -39,11 +39,11 @@ if __name__ == '__main__':
     parser.add_argument('--dim', type=int, default=10)
     args = parser.parse_args()
 
-    print args, '\n'
+    print(args, '\n')
 
     if not os.path.exists(args.save_path):
         subprocess.Popen(['mkdir', args.save_path])
-    
+
     for i in range(args.start, args.end):
         data_path = os.path.join(args.data_path, str(i) + '.p')
         data = pickle.load( open(data_path, 'rb') )
@@ -58,11 +58,11 @@ if __name__ == '__main__':
         place_goal(sprites, None, save_path, num_cells = args.dim)
 
         for g, goal in enumerate(data['goals']):
-            print data['instructions'][g], goal
+            print(data['instructions'][g], goal)
             save_path = os.path.join(args.save_path, str(i) + '_' + str(g) + '.png')
-            print save_path, '\n'
+            print(save_path, '\n')
             place_goal(sprites, goal, save_path, num_cells = args.dim)
-        
+
 
 
 

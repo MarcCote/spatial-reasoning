@@ -2,7 +2,8 @@
 
 import sys, os, argparse, pickle, subprocess, pdb
 from tqdm import tqdm
-import environment, utils
+from spatial_reasoning import environment
+from spatial_reasoning import utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lower', type=int, default=0)
@@ -16,25 +17,25 @@ parser.add_argument('--sprite_dim', type=int, default=100)
 parser.add_argument('--num_steps', type=int, default=10)
 args = parser.parse_args()
 
-print args, '\n'
+print(args, '\n')
 
 utils.mkdir(args.vis_path)
 utils.mkdir(args.save_path)
 
 
 if args.mode == 'local':
-    from environment.NonUniqueGenerator import NonUniqueGenerator
+    from spatial_reasoning.environment.NonUniqueGenerator import NonUniqueGenerator
     gen = NonUniqueGenerator( environment.figure_library.objects, environment.figure_library.unique_instructions, shape=(args.dim, args.dim), num_steps=args.num_steps, only_global=args.only_global )
 elif args.mode == 'global':
-    from environment.GlobalGenerator import GlobalGenerator
+    from spatial_reasoning.environment.GlobalGenerator import GlobalGenerator
     gen = GlobalGenerator( environment.figure_library.objects, environment.figure_library.unique_instructions, shape=(args.dim, args.dim), num_steps=args.num_steps, only_global=args.only_global )
 
-
+from ipdb import set_trace; set_trace()
 for outer in range(args.lower, args.lower + args.num_worlds):
     info = gen.new()
     configurations = len(info['rewards'])
 
-    print 'Generating map', outer, '(', configurations, 'configuations )'
+    print('Generating map', outer, '(', configurations, 'configuations )')
     sys.stdout.flush()
 
     world = info['map']
